@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffffff" id="theme-color">
+  <title>Рождественское поздравление</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background-color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    h2{color:green}
+
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      cursor: pointer;
+      background-color: #b22222;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    button:hover {
+      background-color: #dc143c;
+    }
+
+    /* Модальное окно */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(50, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      position: relative;
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      width: 90%;
+      max-width: 500px;
+      height: 90%;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 2em;
+      text-align: center;
+      background-image: linear-gradient(90deg, #ff0000, #ffd700, #00ff00, #1e90ff, #ff69b4);
+      background-size: 400%;
+      color: transparent;
+      -webkit-background-clip: text;
+      animation: gradient-animation 5s infinite alternate;
+    }
+
+    @keyframes gradient-animation {
+      0% {
+        background-position: 0%;
+      }
+      100% {
+        background-position: 100%;
+      }
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 10px 20px;
+      background-color: #FFFFFF30;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      background-color: #ff6347;
+    }
+
+    .animation-item {
+      position: absolute;
+      top: -10px;
+      font-size: 2em;
+      animation: fall 5s linear infinite;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-10vh) rotate(0deg);
+      }
+      100% {
+        transform: translateY(110vh) rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+        <h1>Дорогие друзья!
+         С Рождеством Христовым!</h1>
+  <button id="open-modal">Открыть поздравление</button>
+
+  <!-- Модальное окно -->
+  <div class="modal" id="modal">
+    <div class="modal-content" id="modal-content">
+      <h1>С Рождеством Христовым!</h1>
+      <h2>Лук 2:9-11: "Вдруг предстал им Ангел Господень, и слава Господня осияла их; и убоялись страхом великим. И сказал им Ангел: не бойтесь; я возвещаю вам великую радость, которая будет всем людям: ибо ныне родился вам в городе Давидовом Спаситель, Который есть Христос Господь;"</h2>
+      <button class="close" id="close-modal">&#10060;</button>
+    </div>
+  </div>
+
+  <script>
+    let animationInterval;
+    let colorInterval;
+
+    const items = ['❄️', '🎁', '⭐', '🎄', '👼'];
+    const colors = ['#ff0000', '#ffd700', '#00ff00', '#1e90ff', '#ff69b4'];
+
+    function createAnimationItem(modalContent) {
+      const item = document.createElement('div');
+      item.classList.add('animation-item');
+      item.textContent = items[Math.floor(Math.random() * items.length)];
+      item.style.left = `${Math.random() * 100}%`;
+      item.style.animationDuration = `${Math.random() * 3 + 2}s`;
+      item.style.color = colors[Math.floor(Math.random() * colors.length)];
+      modalContent.appendChild(item);
+
+      item.addEventListener('animationend', () => {
+        item.remove();
+      });
+    }
+
+    function flashBackgroundWithVibration(modalContent) {
+      let colorIndex = 0;
+      colorInterval = setInterval(() => {
+        const themeColor = document.getElementById('theme-color');
+        modalContent.style.backgroundColor = colors[colorIndex];
+        themeColor.setAttribute('content', colors[colorIndex]); // Меняем цвет панели браузера
+        navigator.vibrate(200);
+        colorIndex = (colorIndex + 1) % colors.length;
+      }, 1000);
+    }
+
+    function startCelebration() {
+      const modalContent = document.getElementById('modal-content');
+      animationInterval = setInterval(() => {
+        createAnimationItem(modalContent);
+      }, 300);
+      flashBackgroundWithVibration(modalContent);
+    }
+
+    function stopCelebration() {
+      clearInterval(animationInterval);
+      clearInterval(colorInterval);
+      animationInterval = null;
+      colorInterval = null;
+
+      const modalContent = document.getElementById('modal-content');
+      modalContent.style.backgroundColor = '#ffffff';
+      document.getElementById('theme-color').setAttribute('content', '#ffffff');
+      navigator.vibrate(0);
+      modalContent.querySelectorAll('.animation-item').forEach(item => item.remove());
+    }
+
+    const openModal = document.getElementById('open-modal');
+    const closeModal = document.getElementById('close-modal');
+    const modal = document.getElementById('modal');
+
+    openModal.addEventListener('click', () => {
+      modal.style.display = 'flex';
+      startCelebration();
+    });
+
+    closeModal.addEventListener('click', () => {
+      modal.style.display = 'none';
+      stopCelebration();
+    });
+  </script>
+</body>
+</html>
