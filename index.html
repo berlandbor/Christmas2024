@@ -16,20 +16,20 @@
       height: 100vh;
     }
     
-     h2{color:green;
-       text-shadow: 0 4px 10px rgba(100, 10, 20, 0.7);
-   
-     }
-     
-     h1{
-text-shadow: 0 4px 10px rgba(20, 230, 250, 0.7)
-     }
+    h2 {
+      color: green;
+      text-shadow: 0 4px 10px rgba(100, 10, 20, 0.7);
+    }
+    
+    h1 {
+      text-shadow: 0 4px 10px rgba(20, 230, 250, 0.7);
+    }
 
     button {
       padding: 15px 30px;
       font-size: 18px;
       cursor: pointer;
-     background: linear-gradient(to right, red, green);
+      background: linear-gradient(to right, red, green);
       color: #fff;
       border: none;
       border-radius: 5px;
@@ -40,7 +40,6 @@ text-shadow: 0 4px 10px rgba(20, 230, 250, 0.7)
       background-color: #dc143c;
     }
 
-    /* Основное модальное окно */
     .modal {
       display: none;
       position: fixed;
@@ -83,7 +82,6 @@ text-shadow: 0 4px 10px rgba(20, 230, 250, 0.7)
       background-color: #ff6347;
     }
 
-    /* Вложенное модальное окно */
     .inner-modal {
       position: absolute;
       top: 50%;
@@ -138,20 +136,91 @@ text-shadow: 0 4px 10px rgba(20, 230, 250, 0.7)
 <body>
   <button id="open-modal">Дорогие друзья!<br> Нажмите здесь, чтобы открыть поздравление с Рождеством Христовым.</button>
 
-  <!-- Основное модальное окно -->
   <div class="modal" id="modal">
     <div class="modal-content" id="modal-content">
       <button class="close" id="close-modal">&#10060;</button>
 
-      <!-- Вложенное модальное окно -->
       <div class="inner-modal" id="inner-modal">
         <h1>С Рождеством Христовым!</h1>
-         <h2>Лук 2:9-11: "Вдруг предстал им Ангел Господень, и слава Господня осияла их; и убоялись страхом великим. И сказал им Ангел: не бойтесь; я возвещаю вам великую радость, которая будет всем людям: ибо ныне родился вам в городе Давидовом Спаситель, Который есть Христос Господь;"</h2>
+        <h2>Лук 2:9-11: "Вдруг предстал им Ангел Господень, и слава Господня осияла их; и убоялись страхом великим. И сказал им Ангел: не бойтесь; я возвещаю вам великую радость, которая будет всем людям: ибо ныне родился вам в городе Давидовом Спаситель, Который есть Христос Господь;"</h2>
       </div>
     </div>
   </div>
 
   <script>
+    const melody = [
+      { note: 'E4', duration: 400 },
+      { note: 'E4', duration: 400 },
+      { note: 'E4', duration: 800 },
+      { note: 'E4', duration: 400 },
+      { note: 'E4', duration: 400 },
+      { note: 'E4', duration: 800 },
+      { note: 'E4', duration: 400 },
+      { note: 'G4', duration: 400 },
+      { note: 'C4', duration: 400 },
+      { note: 'D4', duration: 400 },
+      { note: 'E4', duration: 1600 },
+    ];
+
+    const notesFrequency = {
+      C4: 261.63,
+      D4: 293.66,
+      E4: 329.63,
+      F4: 349.23,
+      G4: 392.00,
+      A4: 440.00,
+      B4: 493.88,
+    };
+
+    let audioContext;
+    let isPlaying = false;
+    let melodyInterval;
+
+    function playMelody() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      let currentTime = audioContext.currentTime;
+
+      melody.forEach((note) => {
+        if (note.note in notesFrequency) {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+
+          oscillator.frequency.value = notesFrequency[note.note];
+          oscillator.type = 'sine';
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+
+          gainNode.gain.setValueAtTime(0, currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.1, currentTime + 0.05);
+          gainNode.gain.linearRampToValueAtTime(0, currentTime + note.duration / 1000);
+
+          oscillator.start(currentTime);
+          oscillator.stop(currentTime + note.duration / 1000);
+
+          currentTime += note.duration / 1000;
+        }
+      });
+
+      if (!melodyInterval) {
+        melodyInterval = setInterval(playMelody, melody.reduce((sum, note) => sum + note.duration, 0));
+      }
+    }
+
+    function stopMelody() {
+      if (melodyInterval) {
+        clearInterval(melodyInterval);
+        melodyInterval = null;
+      }
+
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+    }
+
     let animationInterval;
     let colorInterval;
 
@@ -189,6 +258,10 @@ text-shadow: 0 4px 10px rgba(20, 230, 250, 0.7)
         createAnimationItem(modalContent);
       }, 300);
       flashBackgroundWithVibration(modalContent);
+      if (!isPlaying) {
+        isPlaying = true;
+        playMelody();
+      }
     }
 
     function stopCelebration() {
@@ -201,7 +274,10 @@ text-shadow: 0 4px 10px rgba(20, 230, 250, 0.7)
       modalContent.style.backgroundColor = '#ffffff';
       document.getElementById('theme-color').setAttribute('content', '#ffffff');
       navigator.vibrate(0);
-      modalContent.querySelectorAll('.animation-item').forEach(item => item.remove());
+      modalContent.querySelectorAll('.animation-item').forEach((item) => item.remove());
+
+      stopMelody();
+      isPlaying = false;
     }
 
     const openModal = document.getElementById('open-modal');
